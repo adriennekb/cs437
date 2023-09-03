@@ -1,6 +1,5 @@
 import picar_4wd as fc
 import time
-import collections
 
 speed = 20
 
