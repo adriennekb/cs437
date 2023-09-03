@@ -7,6 +7,7 @@ def test():
     fc.forward(speed)
     while True:
         # Find distance, then turn right if close
+        distance = fc.get_distance_at(0)
         print(distance)
         if distance < 12.0:
             print("Move back and turn right")
