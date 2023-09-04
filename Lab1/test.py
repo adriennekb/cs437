@@ -1,5 +1,6 @@
 import picar_4wd as fc
 import time
+import random
 
 speed = 20
 
@@ -14,7 +15,12 @@ def test():
             # Move back and turn right
             fc.backward(speed)
             time.sleep(.3)
-            fc.turn_right(speed*2)
+            #randomize the turn side
+            turn = random.randint(0,1)
+            if turn == 0:
+                fc.turn_right(speed*2)
+            else:
+                fc.turn_left(speed*2)
             time.sleep(2)
             # Stop and restart loop to go forward
             fc.stop()
