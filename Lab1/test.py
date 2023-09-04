@@ -11,7 +11,7 @@ def test():
         distance = fc.get_distance_at(0)
         print(distance)
         if distance < 12.0:
-            print("Move back and turn right")
+            print("Move back and turn right or left")
             # Move back and turn right
             fc.backward(speed)
             time.sleep(.3)
