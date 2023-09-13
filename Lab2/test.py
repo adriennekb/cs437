@@ -5,29 +5,37 @@ import numpy as np
 import sys
 import math
 
+# speed of vehicle
 speed = 20
+
 #fill a 2D array with 0s that is 100x100(grid_size)
 grid_size = 30
-
 array_map = np.zeros((grid_size, grid_size))
+# set the numpy printing size for screen reading and text files
 np.set_printoptions(threshold=sys.maxsize, linewidth=sys.maxsize)
 
 def update_map():
-    #set car at bottom center of the array
+    # set car at bottom center of the array
     car_location = (grid_size-1, math.floor(grid_size/2)-1)
+
+    # set starting angle at -90
     angle = -90
     fc.get_distance_at(angle)
+    # wait for the servo to reach destination to avoid misreadings
     time.sleep(0.3)
-    #marking the car as 2 to distinguish
+
+    # marking the car as 2 to distinguish location on array
     array_map[car_location] = 2
     # print(array_map)
     while angle <= 90:
         distance = fc.get_distance_at(angle)
+        # this will only print distances of objects within the grid size set
         if 0 < distance < grid_size:
-            print(angle, '° =', distance, "cm")
+            print(angle, '° ->', distance, "cm")
         else:
-            print(angle, '° =', '/')
-        
+            print(angle, '° ->', '/')
+        # this will try to put a number 1 if it detects anything within 
+        # the grid size
         if 0 < distance < grid_size:
             try:
                 a = (distance*(math.cos(math.radians(angle))))
@@ -36,8 +44,12 @@ def update_map():
                     b *= -1
                 a = (grid_size-1) - a
                 b = (math.floor(grid_size/2)-1) - b
+                # will map only if the object is within the grid size
                 if 0 < a < grid_size and 0 < b <grid_size:
                     array_map[math.floor(a), math.floor(b)] = 1
+                    # We are assuming objects are within 1 cm so we add
+                    # extra 1 cm to both left and right to account for 
+                    # the 5 degrees that are not tested and fill the 0 gaps
                     try:
                         array_map[math.floor(a), math.floor(b-1)] = 1
                         array_map[math.floor(a), math.floor(b+1)] = 1
@@ -48,12 +60,13 @@ def update_map():
         angle += 5
     # print(array_map)
 
+    # Saving the array in a text file to see results
     file = open("map.txt", "w+")
-    # Saving the array in a text file
     content = str(array_map)
     file.write(content)
     file.close()
 
+# this function is used just for testing, enable it in main
 def object_locations():
     for y, x in np.ndindex(array_map.shape):
         if array_map[x, y] == 1:
@@ -88,7 +101,7 @@ def test():
 if __name__ == '__main__':
     try:
         update_map()
-        object_locations()
+        # object_locations()
         # test()
     except KeyboardInterrupt:
         fc.stop()
