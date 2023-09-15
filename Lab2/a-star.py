@@ -21,7 +21,7 @@ def getNeighbors(current_pos, grid):
   current_col = current_pos[1]
   possible_neighbors = [(current_row + 1, current_col), 
                (current_row - 1, current_col), 
-               (current_row, current_col - 1), 
+               (current_row, current_col + 1), 
                (current_row, current_col - 1)]
   neighbors = []
   
@@ -50,59 +50,63 @@ def getStart(grid):
 
 
 def astar(grid):
-  start_pos = getStart(grid)
+  current_pos = getStart(grid)
   # Defining end as top-left of grid, can be changed 
   end_pos = (0, 0)
   
   frontier = []
   predecessor = {}
   direction = {
-    start_pos: -1
+    current_pos: -1
   }
   g_cost = {
-    start_pos: 0
+    current_pos: 0
   }
   f_cost = {
-    start_pos: manhattan(start_pos[0], start_pos[1], end_pos[0], end_pos[1])
+    current_pos: manhattan(current_pos[0], current_pos[1], end_pos[0], end_pos[1])
   }
 
   heap_order = 0
-  heapq.heappush(frontier, (f_cost[start_pos], 0, heap_order, start_pos))
+  heapq.heappush(frontier, (f_cost[current_pos], heap_order, current_pos))
 
   while len(frontier) > 0:
     current = heapq.heappop(frontier)
-    current_pos = current[3]
+    current_pos = current[2]
     curr_dir = direction[current_pos]
 
     if current_pos == end_pos:
       return construct_path(current_pos, predecessor)
     
     neighbors = getNeighbors(current_pos, grid)
+  
     for neighbor_pos, neighbor_dir in neighbors:
       neighbor_g = g_cost[current_pos] + 1
       if neighbor_pos not in g_cost or neighbor_g < g_cost[neighbor_pos]:
+        dir_diff = getDirPriority(curr_dir, neighbor_dir)
+        neighbor_g = neighbor_g + dir_diff
         neighbor_f = neighbor_g + manhattan(neighbor_pos[0], neighbor_pos[1], end_pos[0], end_pos[1])
         g_cost[neighbor_pos] = neighbor_g
         f_cost[neighbor_pos] = neighbor_f
         predecessor[neighbor_pos] = current_pos
         direction[neighbor_pos] = neighbor_dir
-        dir_diff = getDirPriority(curr_dir, neighbor_dir)
         heap_order += 1
-        heapq.heappush(frontier, (f_cost[neighbor_pos], dir_diff, heap_order, neighbor_pos))
+
+        heapq.heappush(frontier, (f_cost[neighbor_pos], heap_order, neighbor_pos))
 
 
 if __name__ == '__main__':
-  print(astar([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  print(astar([[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
