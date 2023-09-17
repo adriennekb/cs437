@@ -59,6 +59,7 @@ def update_map():
                 print("something broke in math function", a, b)
         angle += 5
     # print(array_map)
+    fc.get_distance_at(0)
 
     # Saving the array in a text file to see results
     file = open("map.txt", "w+")
