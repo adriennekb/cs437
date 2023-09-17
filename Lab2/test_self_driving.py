@@ -10,7 +10,7 @@ import math
 
 # Import necessary functions and classes from your existing files
 from astar import astar, getStart, construct_path, getNeighbors, manhattan, getNewDir
-from object_detection import VideoStream, run
+from object_detection import VideoStream
 from object_location import update_map, object_locations
 
 # speed of vehicle
@@ -18,6 +18,9 @@ _SPEED = 20
 
 # grid size for object location mapping
 _GRID_SIZE = 30
+
+# minimum confidence threshold for object detection
+_CONFIDENCE_THRESHOLD = 0.5
 
 # Initialize array map
 array_map = np.zeros((_GRID_SIZE, _GRID_SIZE))
@@ -27,17 +30,19 @@ def setup_arg_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', default='detect.tflite', help='Path of the object detection model.')
     parser.add_argument('--labelMap', default='labelmap.txt', help='Path of the label map.')
-    parser.add_argument('--frameWidth', type=int, default=640, help='Width of frame to capture from camera.')
-    parser.add_argument('--frameHeight', type=int, default=480, help='Height of frame to capture from camera.')
-    parser.add_argument('--minThreshold', type=float, default=0.5, help='Minimum confidence threshold for object detection.')
-    
     return parser
 
-def object_detection(interpreter, input_details, output_details, labels, min_threshold, stream, width, height):
+def object_detection(interpreter, labels, stream):
     """Detect objects using the object detection model and return the detections."""
 
-    # Get the current frame from the video stream
+    # Get the current frame from the video stream and rotate to the correct direction
     frame = stream.read()
+    frame = cv2.rotate(frame, cv2.ROTATE_180)
+
+    height = input_details[0]['shape'][1]
+    width = input_details[0]['shape'][2]
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
 
     # Run the current frame through the object detection model
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -47,7 +52,6 @@ def object_detection(interpreter, input_details, output_details, labels, min_thr
     interpreter.invoke()
 
     # Get the detection results
-    boxes = interpreter.get_tensor(output_details[0]['index'])[0]
     classes = interpreter.get_tensor(output_details[1]['index'])[0]
     scores = interpreter.get_tensor(output_details[2]['index'])[0]
 
@@ -55,7 +59,7 @@ def object_detection(interpreter, input_details, output_details, labels, min_thr
 
     # Check the detections and set the corresponding flags
     for i in range(len(scores)):
-        if scores[i] > min_threshold:
+        if scores[i] > _CONFIDENCE_THRESHOLD:
             object_label = labels[int(classes[i])]
             if object_label in detections:
                 detections[object_label] = True
@@ -116,12 +120,12 @@ def turn(curr_dir, new_dir):
         else: 
             fc.turn_right(_SPEED)
 
-def steer_car_to_follow_path(path):
+def steer_car_to_follow_path(path, interpreter, labels, video_stream):
     curr_dir = -1
     if path:
         for i in path[1:]:
             # Step 5: Object detection to identify specific objects (like stop signs) and take appropriate actions
-            detections, frame = object_detection(interpreter, input_details, output_details, labels, args.minThreshold, video_stream, width, height)
+            detections, frame = object_detection(interpreter, labels, video_stream)
             if handle_detections(detections):
                 return 
 
@@ -142,7 +146,7 @@ def main():
     args = parser.parse_args()
 
     # Initialize video stream with the specified resolution
-    video_stream = VideoStream(resolution=(args.frameWidth, args.frameHeight), framerate=30).start()
+    video_stream = VideoStream(resolution=(640, 480), framerate=30).start()
     time.sleep(1)  # Allow some time for the video stream to start
 
     # Initialize object detection interpreter
@@ -159,12 +163,6 @@ def main():
     args = parser.parse_args()
     goal = (0,0)
 
-    #Get Input and Output Details
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    height = input_details[0]['shape'][1]
-    width = input_details[0]['shape'][2]
-
     while True:
         # Step 1: Update the map with the latest sensor data
         update_map()
@@ -180,7 +178,7 @@ def main():
         path = astar(grid)
 
         # Step 6: Use the path found by A* to guide the car
-        steer_car_to_follow_path(path)
+        steer_car_to_follow_path(path, interpreter, labels, video_stream)
 
         # Overlay the path on the current frame (assuming `path` is a list of (x, y) coordinates)
         for (x, y) in path:
