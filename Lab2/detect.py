@@ -158,12 +158,12 @@ def main():
       '--model',
       help='Path of the object detection model.',
       required=False,
-      default='./coco_ssd_mobilenet_v1/detect.tflite')
+      default='./detect.tflite')
   parser.add_argument(
       '--labelMap',
       help='Path of the label map.',
       required=False,
-      default='./coco_ssd_mobilenet_v1/labelmap.txt')
+      default='./labelmap.txt')
   parser.add_argument(
       '--frameWidth',
       help='Width of frame to capture from camera.',
