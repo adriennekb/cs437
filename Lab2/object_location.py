@@ -14,6 +14,24 @@ array_map = np.zeros((grid_size, grid_size))
 # set the numpy printing size for screen reading and text files
 np.set_printoptions(threshold=sys.maxsize, linewidth=sys.maxsize)
 
+def padMap(map):
+    padded_map = np.zeros(len(map), len(map[0]))
+
+    for i in range(len(map)):
+        for j in range(len(map[0])):
+            if map[i][j] == 1:
+                padded_map[i][j] = 1
+                if i > 0:
+                    padded_map[i - 1][j] = 1
+                if i < len(map) - 1:
+                    padded_map[i + 1][j] = 1
+                if j > 0:
+                    padded_map[i][j - 1] = 1
+                if j < len(map[0]) - 1:
+                    padded_map[i][j + 1] = 1
+
+    return padded_map
+
 def update_map():
     # set car at bottom center of the array
     car_location = (grid_size-1, math.floor(grid_size/2)-1)
@@ -60,9 +78,11 @@ def update_map():
         angle += 5
     # print(array_map)
 
+    padded_map = padMap(array_map)
+
     # Saving the array in a text file to see results
     file = open("map.txt", "w+")
-    content = str(array_map)
+    content = str(padded_map)
     file.write(content)
     file.close()
 
