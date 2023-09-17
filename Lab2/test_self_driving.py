@@ -55,7 +55,7 @@ def object_detection(interpreter, labels, stream):
     classes = interpreter.get_tensor(output_details[1]['index'])[0]
     scores = interpreter.get_tensor(output_details[2]['index'])[0]
 
-    detections = {'stop sign': False, 'traffic cone': False}
+    detections = {'stop sign': False, 'person': False}
 
     # Check the detections and set the corresponding flags
     for i in range(len(scores)):
@@ -86,8 +86,8 @@ def handle_detections(detections):
         print('STOP Sign Detected')
         fc.stop()
         time.sleep(2)
-    elif detections['traffic cone']:
-        print('Traffic Cone Detected')
+    elif detections['person']:
+        print('Person Detected')
         fc.stop()
         time.sleep(0.5)
         perform_maneuver()
@@ -171,13 +171,10 @@ def main():
         grid = array_map.copy()
         print(grid)
 
-        # Step 3: Find the start position (modify getStart function to work with your obstacle data)
-        start = getStart(grid)
-
-        # Step 4: Run the A* algorithm to find the optimal path
+        # Step 3: Run the A* algorithm to find the optimal path
         path = astar(grid)
 
-        # Step 6: Use the path found by A* to guide the car
+        # Step 4: Use the path found by A* to guide the car
         steer_car_to_follow_path(path, interpreter, labels, video_stream)
 
         # Overlay the path on the current frame (assuming `path` is a list of (x, y) coordinates)
