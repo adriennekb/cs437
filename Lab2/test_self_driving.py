@@ -9,7 +9,7 @@ import numpy as np
 import math
 
 # Import necessary functions and classes from your existing files
-from astar import astar, getStart, construct_path, getNeighbors, manhattan
+from astar import astar, getStart, construct_path, getNeighbors, manhattan, getNewDir
 from object_detection import VideoStream, run
 from object_location import update_map, object_locations
 
@@ -62,6 +62,18 @@ def object_detection(interpreter, input_details, output_details, labels, min_thr
 
     return detections, frame
 
+def perform_maneuver():
+    """Perform a maneuver to avoid an obstacle."""
+    
+    # Execute a maneuver to go around the obstacle
+    fc.turn_left(_SPEED)  # Start with a left turn
+    time.sleep(1)  # Adjust the time to suit the turning radius
+    fc.forward(_SPEED)  # Move forward to go around the obstacle
+    time.sleep(1)  # Adjust the time based on the distance to be covered
+    fc.turn_right(_SPEED)  # Turn right to realign with the original path
+    time.sleep(1)  # Adjust the time to suit the turning radius
+    fc.forward(_SPEED)  # Continue moving forward
+
 def handle_detections(detections):
     """Handle detections and take appropriate actions based on the detected objects."""
 
@@ -77,26 +89,52 @@ def handle_detections(detections):
         perform_maneuver()
     else:
         fc.forward(_SPEED)
+        return False
+    return True
 
-def perform_maneuver():
-    """Perform a maneuver to avoid an obstacle."""
-    
-    # Execute a maneuver to go around the obstacle
-    fc.turn_left(_SPEED)  # Start with a left turn
-    time.sleep(1)  # Adjust the time to suit the turning radius
-    fc.forward(_SPEED)  # Move forward to go around the obstacle
-    time.sleep(1)  # Adjust the time based on the distance to be covered
-    fc.turn_right(_SPEED)  # Turn right to realign with the original path
-    time.sleep(1)  # Adjust the time to suit the turning radius
-    fc.forward(_SPEED)  # Continue moving forward
+def turn(curr_dir, new_dir):
+    if curr_dir == new_dir:
+        return
+    if curr_dir == -1: # Facing left
+        if new_dir == -0.5:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+    if curr_dir == -0.5:
+        if new_dir == 1:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+    if curr_dir == 0.5:
+        if new_dir == -1:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+    else:
+        if new_dir == 0.5:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
 
 def steer_car_to_follow_path(path):
+    curr_dir = -1
     if path:
-        for point in path[1:]:
-            x, y = point
-            #Move 1, if the point is x-1, y, then
+        for i in path[1:]:
+            # Step 5: Object detection to identify specific objects (like stop signs) and take appropriate actions
+            detections, frame = object_detection(interpreter, input_details, output_details, labels, args.minThreshold, video_stream, width, height)
+            if handle_detections(detections):
+                return 
 
+            curr_x, curr_y = path[i-1]
+            new_x, new_y = path[i]
+            new_dir = getNewDir((new_x, new_y), (curr_x, curr_y))
 
+            turn(curr_dir, new_dir)
+            time.sleep(2)
+            fc.forward(_SPEED) # TODO: Move one cell on the grid
+            # time.sleep()
+            fc.stop() # Stop after some time
+            curr_dir = new_dir
 
 def main():
     # Set up argument parser and parse command-line arguments
@@ -133,6 +171,7 @@ def main():
 
         # Step 2: Get the updated grid
         grid = array_map.copy()
+        print(grid)
 
         # Step 3: Find the start position (modify getStart function to work with your obstacle data)
         start = getStart(grid)
@@ -140,10 +179,9 @@ def main():
         # Step 4: Run the A* algorithm to find the optimal path
         path = astar(grid)
 
-        # Step 5: Object detection to identify specific objects (like stop signs) and take appropriate actions
-        
-        detections, frame = object_detection(interpreter, input_details, output_details, labels, args.minThreshold, video_stream, width, height)
-        handle_detections(detections)
+        # Step 6: Use the path found by A* to guide the car
+        steer_car_to_follow_path(path)
+
         # Overlay the path on the current frame (assuming `path` is a list of (x, y) coordinates)
         for (x, y) in path:
             cv2.circle(frame, (x * 20, y * 20), 5, (0, 255, 0), -1)  # Adjust the multiplier for x and y based on your grid size
@@ -153,9 +191,6 @@ def main():
     
         # Return True if the user pressed the 'q' key, indicating they want to quit
         return cv2.waitKey(1) & 0xFF == ord('q')
-
-        # Step 6: Use the path found by A* to guide the car
-        steer_car_to_follow_path(path)
         
 
     # ... (add code to integrate A*, object detection, and object location updates into a loop)

@@ -16,6 +16,10 @@ def construct_path(current_pos, predecessor):
   return path
 
 
+def getNewDir(neighbor, current_pos):
+  return (neighbor[0] - current_pos[0]) + ((neighbor[1] - current_pos[1]) * 0.5)
+
+
 def getNeighbors(current_pos, grid):
   current_row = current_pos[0]
   current_col = current_pos[1]
@@ -28,7 +32,7 @@ def getNeighbors(current_pos, grid):
   for neighbor in possible_neighbors:
     if neighbor[0] < 0 or neighbor[0] >= len(grid) or neighbor[1] < 0 or neighbor[1] >= len(grid[0]) or grid[neighbor[0]][neighbor[1]] != 0:
       continue
-    new_dir = (neighbor[0] - current_pos[0]) + ((neighbor[1] - current_pos[1]) * 0.5)
+    new_dir = getNewDir(neighbor, current_pos)
     neighbors.append((neighbor, new_dir))
   
   return neighbors
@@ -56,12 +60,26 @@ def astar(grid):
   
   frontier = []
   predecessor = {}
+
+  """
+  Direction is defined as:
+  - Up: -1
+  - Down: 1
+  - Left: -0.5
+  - Right: 0.5
+
+  We're always facing "up" 
+  """
   direction = {
     current_pos: -1
   }
+
+  # Cost so far
   g_cost = {
     current_pos: 0
   }
+
+  # Total cost = g(n) + h(n) = g(n) + manhattan(n)
   f_cost = {
     current_pos: manhattan(current_pos[0], current_pos[1], end_pos[0], end_pos[1])
   }
