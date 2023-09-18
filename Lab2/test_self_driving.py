@@ -39,9 +39,10 @@ def object_detection(interpreter, labels, stream):
     frame = stream.read()
     frame = cv2.rotate(frame, cv2.ROTATE_180)
 
+    input_details = interpreter.get_input_details()
     height = input_details[0]['shape'][1]
     width = input_details[0]['shape'][2]
-    input_details = interpreter.get_input_details()
+    #input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
     # Run the current frame through the object detection model
@@ -165,7 +166,7 @@ def main():
 
     while True:
         # Step 1: Update the map with the latest sensor data
-        update_map()
+        array_map = update_map()
 
         # Step 2: Get the updated grid
         grid = array_map.copy()

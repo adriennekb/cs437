@@ -15,7 +15,7 @@ array_map = np.zeros((grid_size, grid_size))
 np.set_printoptions(threshold=sys.maxsize, linewidth=sys.maxsize)
 
 def padMap(map):
-    padded_map = np.zeros(len(map), len(map[0]))
+    padded_map = np.zeros((len(map), len(map[0])))
 
     for i in range(len(map)):
         for j in range(len(map[0])):
@@ -43,7 +43,7 @@ def update_map():
     time.sleep(0.3)
 
     # marking the car as 2 to distinguish location on array
-    array_map[car_location] = 2
+    #array_map[car_location] = 2
     # print(array_map)
     while angle <= 90:
         distance = fc.get_distance_at(angle)
@@ -79,12 +79,13 @@ def update_map():
     # print(array_map)
 
     padded_map = padMap(array_map)
-
+    padded_map[car_location] = 2
     # Saving the array in a text file to see results
     file = open("map.txt", "w+")
     content = str(padded_map)
     file.write(content)
     file.close()
+    return padded_map
 
 # this function is used just for testing, enable it in main
 def object_locations():
