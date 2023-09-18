@@ -1,5 +1,12 @@
 import heapq
+import picar_4wd as fc
+import time
 
+# speed of vehicle
+_SPEED = 20
+
+# grid size for object location mapping
+_GRID_SIZE = 30
 
 def manhattan(start_row, start_col, end_row, end_col):
   return (abs(end_row - start_row) + abs(end_col - start_col))
@@ -112,8 +119,49 @@ def astar(grid):
         heapq.heappush(frontier, (f_cost[neighbor_pos], heap_order, neighbor_pos))
 
 
+def turn(curr_dir, new_dir):
+    if curr_dir == new_dir:
+        return
+    if curr_dir == -1: # Facing left
+        if new_dir == -0.5:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+    if curr_dir == -0.5:
+        if new_dir == 1:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+    if curr_dir == 0.5:
+        if new_dir == -1:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+    else:
+        if new_dir == 0.5:
+            fc.turn_left(_SPEED)
+        else: 
+            fc.turn_right(_SPEED)
+
+
+def steer_car_to_follow_path(path):
+    curr_dir = -1
+    if path:
+        for i in path[1:]:
+            curr_x, curr_y = path[i-1]
+            new_x, new_y = path[i]
+            new_dir = getNewDir((new_x, new_y), (curr_x, curr_y))
+
+            turn(curr_dir, new_dir)
+            time.sleep(2)
+            fc.forward(_SPEED) # TODO: Move one cell on the grid
+            time.sleep(0.3)
+            fc.stop() # Stop after some time
+            curr_dir = new_dir
+            
+
 if __name__ == '__main__':
-  print(astar([[
+  path = astar([[
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -143,4 +191,10 @@ if __name__ == '__main__':
  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]))
+ [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+  
+  print(path)
+  
+
+  # Step 6: Use the path found by A* to guide the car
+  steer_car_to_follow_path(path)
