@@ -9,7 +9,7 @@ For Bluetooth connection
 6. agent on
 7. default-agent
 8. scan on (look for your computer and copy its mac address just by highlighting it)
-9. pair *your pc MAC address* or if that doesn't work, connect through your pc itself Settings->Bluetooth(Might need to enable advanced Bluetooth in it's settings to see RPi)
+9. pair *your_pc_MAC_address* or if that doesn't work, connect through your pc itself Settings->Bluetooth(Might need to enable advanced Bluetooth in it's settings to see RPi)
 10. Edit pi_socket.py in your RPi and add it's controller MAC address in the code (you will see the controller MAC address in step 4)
 11. Edit windows_socket.py in your PC and add your RPi MAC address in the code
 12. Run pi_socket in RPi then windows_socket in PC
