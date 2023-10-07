@@ -1,6 +1,6 @@
 import bluetooth
 
-hostMACAddress = "DC:A6:32:80:7D:87" # The address of Raspberry PI Bluetooth adapter on the server. The server might have multiple Bluetooth adapters.
+hostMACAddress = "E4:5F:01:FC:E7:EE" # The address of Raspberry PI Bluetooth adapter on the server. The server might have multiple Bluetooth adapters.
 port = 0
 backlog = 1
 size = 1024
