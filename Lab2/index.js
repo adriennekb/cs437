@@ -5,7 +5,12 @@ var server_port = 65432;
 var server_addr = "192.168.1.53";   // the IP address of your Raspberry PI
 var fc = 0;
 
-function client(){
+const dataToSend = {
+    fc: 0,
+    input: ""
+};
+
+function client(fc){
     
     const net = require('net');
     var input = document.getElementById("message").value;
@@ -14,20 +19,11 @@ function client(){
         // 'connect' listener.
         console.log('connected to server!');
         // send the message
-        if (fc === 0) {
-            client.write(`${input}\r\n`);
-        } else if (fc === 87) {
-            client.write(`87`);
-        } else if (fc === 83) {
-            client.write(`83`);
-        } else if (fc === 65) {
-            client.write(`65`);
-        } else if (fc === 68) {
-            client.write(`68`);
-        } else {
-            client.write(`${input}\r\n`);
-        }
-        
+        dataToSend.input = input;
+        dataToSend.fc = fc;
+        const jsonData = JSON.stringify(dataToSend);
+        client.write(jsonData);
+        // client.write(`${input}\r\n`);           
     });
 
     // get the data from the server
@@ -99,6 +95,6 @@ function resetKey(e) {
 function update_data(){
     setInterval(function(){
         // get image from python server
-        client();
+        client(fc);
     }, 50);
 }

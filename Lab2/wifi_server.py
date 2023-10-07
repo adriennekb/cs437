@@ -20,16 +20,21 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             client, clientInfo = s.accept()
             print("server recv from: ", clientInfo)
             data = client.recv(1024)      # receive 1024 Bytes of message in binary format
-            print(data)
+            d_data = data.decode()
+            print(d_data)
             if data != b"":
                 print(data)
-            if data == b"87":
+            if d_data == "87":
+                print("forwards")
                 fc.forward(speed)
-            elif data == b"83":
+            elif d_data == "83":
+                print("backwards")
                 fc.backward(speed)
-            elif data == b"65":
+            elif d_data == "65":
+                print("turn left")
                 fc.turn_left(speed)
-            elif data == b"68":
+            elif d_data == "68":
+                print("turn right")
                 fc.turn_right(speed)
             else:
                 fc.stop()
