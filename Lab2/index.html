@@ -45,16 +45,18 @@
         <div class="jumbotron text-left col-md-6">
         <input id="message" type="text" placeholder="message to Pi"/>
         <button class="btn btn-success" onclick="update_data()">Sumbit</button>
-          <p>
-            <span id="direction_dot" style="color:Green">&bull;</span> Car Direction: <span id="direction"> </span>
+          <p>            
+           <span id="speed_dot" style="color:green">&bull;</span> Speed: <span id="speed">0.0</span> 
            <br>
-           <span id="speed_dot" style="color:green">&bull;</span> Speed: <span id="speed">0.0</span>  
+           <span id="direction_dot" style="color:Green">&bull;</span> Car Battery: <span id="battery">0.0</span>/8.7V
            <br>
-           <span id="distance_dot" style="color:green">&bull;</span> Distance Traveled: <span id="distance">0.0</span>
+           <span id="distance_dot" style="color:green">&bull;</span> CPU Usage of the Pi: <span id="cpu_usage">0.0</span>
            <br>
-           <span id="temprature_dot" style="color:green">&bull;</span> Temperature of the Pi: <span id="temperature">0.0</span>
+           <span id="temprature_dot" style="color:green">&bull;</span> CPU Temperature of the Pi: <span id="cpu_temperature">0.0</span>
            <br>
-           Bluetooth return value: <span id="bluetooth"> </span>
+           <span id="temprature_dot" style="color:green">&bull;</span> GPU Temperature of the Pi: <span id="gpu_temperature">0.0</span>
+           <br>
+           Raw data (testing): <span id="raw"> </span>
           </p>  
         </div>
     </div>
