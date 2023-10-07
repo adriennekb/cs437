@@ -5,7 +5,7 @@ import signal
 import time
 
 # Put your raspberrypi's MAC address here
-server_addr = 'D8:3A:DD:2C:81:CF'
+server_addr = 'D8:3A:DD:43:EF:14'
 server_port = 1
 
 buf_size = 1024

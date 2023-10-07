@@ -2,7 +2,7 @@ document.onkeydown = updateKey;
 document.onkeyup = resetKey;
 
 var server_port = 65432;
-var server_addr = "192.168.1.53";   // the IP address of your Raspberry PI
+var server_addr = "10.0.0.222";   // the IP address of your Raspberry PI
 var fc = 0;
 
 const dataToSend = {
@@ -21,6 +21,7 @@ function client(fc){
         // send the message
         dataToSend.input = input;
         dataToSend.fc = fc;
+        client.setEncoding('utf-8')
         const jsonData = JSON.stringify(dataToSend);
         client.write(jsonData);
         // client.write(`${input}\r\n`);           
@@ -49,31 +50,32 @@ function client(fc){
 
 // for detecting which key is been pressed w,a,s,d
 function updateKey(e) {
-
     e = e || window.event;
 
     if (e.keyCode == '87') {
+        console.log("key pressed!!!")
         // up (w)
         document.getElementById("upArrow").style.color = "green";
-        send_data("87");
+        // send_data("87");
         fc = 87;
+        console.log("fc: " + fc)
     }
     else if (e.keyCode == '83') {
         // down (s)
         document.getElementById("downArrow").style.color = "green";
-        send_data("83");
+        // send_data("83");
         fc = 83;
     }
     else if (e.keyCode == '65') {
         // left (a)
         document.getElementById("leftArrow").style.color = "green";
-        send_data("65");
+        // send_data("65");
         fc = 65;
     }
     else if (e.keyCode == '68') {
         // right (d)
         document.getElementById("rightArrow").style.color = "green";
-        send_data("68");
+        // send_data("68");
         fc = 68;
     }
 }
