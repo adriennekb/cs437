@@ -3,6 +3,7 @@ document.onkeyup = resetKey;
 
 var server_port = 65432;
 var server_addr = "192.168.1.53";   // the IP address of your Raspberry PI
+var fc = 0;
 
 function client(){
     
@@ -13,12 +14,31 @@ function client(){
         // 'connect' listener.
         console.log('connected to server!');
         // send the message
-        client.write(`${input}\r\n`);
+        if (fc === 0) {
+            client.write(`${input}\r\n`);
+        } else if (fc === 87) {
+            client.write(`87`);
+        } else if (fc === 83) {
+            client.write(`83`);
+        } else if (fc === 65) {
+            client.write(`65`);
+        } else if (fc === 68) {
+            client.write(`68`);
+        } else {
+            client.write(`${input}\r\n`);
+        }
+        
     });
-    
+
     // get the data from the server
     client.on('data', (data) => {
-        document.getElementById("bluetooth").innerHTML = data;
+        let r_data = JSON.parse(data);
+        document.getElementById("speed").innerHTML = r_data.speed;
+        document.getElementById("cpu_temperature").innerHTML = r_data.cpu_temperature;
+        document.getElementById("gpu_temperature").innerHTML = r_data.gpu_temperature;
+        document.getElementById("cpu_usage").innerHTML = r_data.cpu_usage;
+        document.getElementById("battery").innerHTML = r_data.battery;
+        document.getElementById("raw").innerHTML = data;
         console.log(data.toString());
         client.end();
         client.destroy();
@@ -40,21 +60,25 @@ function updateKey(e) {
         // up (w)
         document.getElementById("upArrow").style.color = "green";
         send_data("87");
+        fc = 87;
     }
     else if (e.keyCode == '83') {
         // down (s)
         document.getElementById("downArrow").style.color = "green";
         send_data("83");
+        fc = 83;
     }
     else if (e.keyCode == '65') {
         // left (a)
         document.getElementById("leftArrow").style.color = "green";
         send_data("65");
+        fc = 65;
     }
     else if (e.keyCode == '68') {
         // right (d)
         document.getElementById("rightArrow").style.color = "green";
         send_data("68");
+        fc = 68;
     }
 }
 
@@ -62,6 +86,7 @@ function updateKey(e) {
 function resetKey(e) {
 
     e = e || window.event;
+    fc = 0;
 
     document.getElementById("upArrow").style.color = "grey";
     document.getElementById("downArrow").style.color = "grey";
